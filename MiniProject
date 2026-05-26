@@ -1,0 +1,133 @@
+"""
+sample_data.py
+Generates a realistic corpus of student assignment texts with:
+  - Unique original content per student
+  - Intentionally shared/copied paragraphs (plagiarism)
+  - Technical definitions repeated across multiple students
+  - Some verbatim copy-paste, some lightly paraphrased
+"""
+
+import random
+
+SHARED_DEFINITIONS = [
+    "Machine learning is a subset of artificial intelligence that enables systems to learn and improve from experience without being explicitly programmed.",
+    "A neural network is a series of algorithms that endeavors to recognize underlying relationships in a set of data through a process that mimics the way the human brain operates.",
+    "Deep learning uses multiple layers of neural networks to progressively extract higher-level features from raw input data.",
+    "An algorithm is a finite sequence of well-defined instructions used to solve a class of specific problems or to perform a computation.",
+    "Data structures are specialized formats for organizing, processing, retrieving and storing data in a computer so that it can be accessed and modified efficiently.",
+    "Object-oriented programming is a programming paradigm based on the concept of objects which can contain data and code to manipulate that data.",
+    "The time complexity of an algorithm quantifies the amount of time taken by an algorithm to run as a function of the length of the input.",
+    "Recursion is a method of solving problems where the solution depends on solutions to smaller instances of the same problem.",
+    "A hash function maps data of arbitrary size to fixed-size values, used in data structures like hash tables for efficient data retrieval.",
+    "Polymorphism in programming allows objects of different classes to be treated as objects of a common superclass.",
+]
+
+SHARED_COPIED_PARAGRAPHS = [
+    "The Boyer-Moore algorithm is considered one of the most efficient string searching algorithms for the general case. It processes the pattern from right to left and uses two heuristics: the bad character rule and the good suffix rule. These heuristics allow the algorithm to skip sections of the text, resulting in a sublinear worst-case complexity.",
+    "The Knuth-Morris-Pratt algorithm exploits the observation that when a mismatch occurs, the pattern itself contains sufficient information to determine where the next match could begin. It uses a precomputed failure function to skip characters without re-examining them, achieving O(n+m) time complexity.",
+    "Dynamic programming is a method for solving complex problems by breaking them down into simpler subproblems. It is applicable to problems with overlapping subproblems and optimal substructure. Memoization stores the results of expensive function calls and returns the cached result when the same inputs occur again.",
+    "In computer science, a binary search tree is a rooted binary tree data structure in which the key of each internal node must be greater than all the keys in the respective left subtree and less than all the keys in the respective right subtree.",
+    "The concept of abstraction in software engineering refers to hiding complex implementation details and showing only the necessary features of an object. Abstraction helps in reducing programming complexity and effort.",
+]
+
+UNIQUE_TOPICS = [
+    ("sorting algorithms", "Bubble sort, merge sort, quick sort, and heap sort each have distinct time and space complexities. Quick sort achieves O(n log n) average performance using divide and conquer. Merge sort guarantees O(n log n) in the worst case but requires O(n) extra space."),
+    ("graph traversal", "Breadth-first search explores nodes level by level using a queue data structure. Depth-first search uses a stack or recursion to explore as far as possible before backtracking. Both algorithms run in O(V+E) time for a graph with V vertices and E edges."),
+    ("database indexing", "B-tree indexes allow databases to find data without scanning every row in a table. Clustered indexes determine the physical order of data in a table. Secondary indexes provide alternative access paths to the data."),
+    ("network protocols", "TCP provides reliable, ordered, and error-checked delivery of a stream of bytes between applications. UDP is a simpler protocol that doesn't guarantee delivery but has lower overhead. HTTP is built on top of TCP and forms the foundation of data communication on the web."),
+    ("operating systems", "Process scheduling determines which process runs at a given time on the CPU. Round-robin scheduling assigns each process a fixed time slot in a cyclic order. Priority scheduling assigns CPU time based on priority levels assigned to each process."),
+    ("cryptography", "Symmetric encryption uses the same key for both encryption and decryption. Asymmetric encryption uses a public key for encryption and a private key for decryption. RSA is a widely used asymmetric algorithm based on the difficulty of factoring large prime numbers."),
+    ("compiler design", "Lexical analysis is the first phase of compilation, converting source code into tokens. Parsing transforms the token stream into an abstract syntax tree. Code generation translates the abstract syntax tree into target machine code."),
+    ("software testing", "Unit testing verifies individual components of software in isolation. Integration testing checks that different components work together correctly. Regression testing ensures that previously working functionality still works after changes."),
+    ("cloud computing", "Infrastructure as a Service provides virtualized computing resources over the internet. Platform as a Service delivers hardware and software tools over the internet for application development. Software as a Service delivers software applications over the internet on a subscription basis."),
+    ("machine vision", "Edge detection identifies points in a digital image where brightness changes sharply. Feature extraction transforms raw image data into numerical features that can be processed. Convolutional neural networks automatically learn spatial hierarchies of features from images."),
+]
+
+STUDENT_NAMES = [
+    "Aarav", "Priya", "Rohan", "Sneha", "Arjun", "Divya", "Karthik", "Meera",
+    "Vikram", "Ananya", "Siddharth", "Pooja", "Rahul", "Lakshmi", "Nikhil",
+    "Shreya", "Aditya", "Kavya", "Rajesh", "Nisha", "Suresh", "Deepa",
+    "Harish", "Swati", "Prasad", "Ritu", "Ganesh", "Preethi", "Sunil", "Geeta",
+]
+
+def _make_student_doc(student_id: int, plagiarism_level: str) -> str:
+    """
+    plagiarism_level: 'none' | 'light' | 'moderate' | 'heavy'
+    """
+    rng = random.Random(student_id * 37 + 13)
+    name = STUDENT_NAMES[student_id % len(STUDENT_NAMES)]
+    roll = f"2024CS{student_id:03d}"
+    topic_idx = student_id % len(UNIQUE_TOPICS)
+    topic_name, topic_body = UNIQUE_TOPICS[topic_idx]
+
+    intro = (
+        f"Name: {name} | Roll No: {roll}\n\n"
+        f"Assignment Report – {topic_name.title()}\n\n"
+        f"Introduction\n\n"
+        f"This report discusses the fundamental concepts related to {topic_name}. "
+        f"The study of {topic_name} is essential in modern computer science education. "
+        f"Understanding these principles helps in developing efficient software systems.\n\n"
+    )
+
+    # Pick definitions to include
+    if plagiarism_level == "none":
+        defs = rng.sample(SHARED_DEFINITIONS, 1)
+    elif plagiarism_level == "light":
+        defs = rng.sample(SHARED_DEFINITIONS, 2)
+    elif plagiarism_level == "moderate":
+        defs = rng.sample(SHARED_DEFINITIONS, 4)
+    else:  # heavy
+        defs = rng.sample(SHARED_DEFINITIONS, 6)
+
+    defs_section = "Key Definitions\n\n" + "\n\n".join(defs) + "\n\n"
+
+    # Pick copied paragraphs
+    if plagiarism_level == "none":
+        copied = []
+    elif plagiarism_level == "light":
+        copied = rng.sample(SHARED_COPIED_PARAGRAPHS, 1)
+    elif plagiarism_level == "moderate":
+        copied = rng.sample(SHARED_COPIED_PARAGRAPHS, 2)
+    else:
+        copied = rng.sample(SHARED_COPIED_PARAGRAPHS, 3)
+
+    copied_section = ""
+    if copied:
+        copied_section = "Technical Background\n\n" + "\n\n".join(copied) + "\n\n"
+
+    body = f"Main Discussion\n\n{topic_body}\n\n"
+
+    conclusion = (
+        f"Conclusion\n\n"
+        f"This report presented an analysis of {topic_name} from a computer science perspective. "
+        f"The algorithms and data structures studied in this course provide a solid foundation "
+        f"for solving real-world computational problems. "
+        f"Further study in this area will deepen understanding of {topic_name}.\n"
+    )
+
+    return intro + defs_section + copied_section + body + conclusion
+
+
+def generate_corpus(num_docs: int = 20) -> dict[str, str]:
+    """
+    Returns {doc_id: text} for num_docs simulated student reports.
+    Distribution: ~20% heavy, 30% moderate, 30% light, 20% none
+    """
+    rng = random.Random(42)
+    levels = (
+        ["heavy"] * max(1, num_docs // 5) +
+        ["moderate"] * max(1, num_docs * 3 // 10) +
+        ["light"] * max(1, num_docs * 3 // 10) +
+        ["none"] * max(1, num_docs // 5)
+    )
+    # Pad/trim to exact length
+    while len(levels) < num_docs:
+        levels.append(rng.choice(["light", "moderate"]))
+    levels = levels[:num_docs]
+    rng.shuffle(levels)
+
+    corpus = {}
+    for i, level in enumerate(levels):
+        doc_id = f"student_{i+1:03d}"
+        corpus[doc_id] = _make_student_doc(i, level)
+    return corpus
